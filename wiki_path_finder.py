@@ -1,45 +1,74 @@
 from lxml import html
 import requests
+import re
 
-# working now
-#/wiki/Tax
-# /wiki/Bolivia (holy shit!)
-#^ has an empty first paragraph which i solved for
-# wiki/Sea_of_Galilee
-# ^ these are in perens and i cant solve it
-# /wiki/Greek_language
-# # well this is the right logic just a double () perenthesis which is wrong
-#/wiki/Finn_McLaine
-# #Mike_Milligan but i need a non # one
+class WikiCrawler(object) :
 
-body_text_selector = '//div[@id="bodyContent"]/div[@id="mw-content-text"]/'
+  final_counts = {}
+  body_text_selector = '//div[@id="bodyContent"]/div[@id="mw-content-text"]/'
+  path_length_distribution = {}
+  url_count_cache = {}
 
-def surrounded_by_perentheses(text_of_link, main_text):
-  index_of_link = main_text.find(text_of_link)
-  main_text_after_link = main_text[index_of_link:]
-  index_of_first_open_perenthesis_after_link = main_text_after_link.find('(')
-  index_of_first_closed_perenthesis_after_link = main_text_after_link.find(')')
-  return index_of_first_open_perenthesis_after_link > index_of_first_closed_perenthesis_after_link
+  def run(self, number):
+    for _ in xrange(number):
+      page = requests.get('https://en.wikipedia.org/wiki/Special:Random')
+      url = page.url.split("en.wikipedia.org")[-1]
+      count = self.get_path_length(url)
+      self.final_counts[url] = count
+    self.create_distribution()
 
-def find_link(tree):
-    content_paragraph_links = tree.xpath(body_text_selector + 'p/a/@href[1]')
-    content_paragraph_texts_of_links = tree.xpath(body_text_selector + 'p/a//text()')
-    print content_paragraph_texts_of_links and content_paragraph_links
-    if not content_paragraph_texts_of_links or not content_paragraph_links:
-      return None
-    main_text = ''.join(tree.xpath(body_text_selector + 'p//text()'))
-    link_idx = 0
-    link = None
-    while not link:
-      text_of_link = content_paragraph_texts_of_links[link_idx]
-      link_candidate = content_paragraph_links[link_idx]
-      if (link_candidate[0] == "/" and not
-          surrounded_by_perentheses(text_of_link, main_text) and
-          link_candidate.find('redlink=1') == -1):
-        link = link_candidate
-      link_idx += 1
-    return link
+  def create_distribution(self):
+    for link, count in self.final_counts.iteritems():
+      self.path_length_distribution[count] = self.path_length_distribution.get(count, 0) + 1
 
-page = requests.get('https://en.wikipedia.org/wiki/Conceptualisation')
-tree = html.fromstring(page.content)
-print find_link(tree)
+  def get_path_length(self, url):
+    count = 0
+    temp_url_count_cache = {}
+    while not url == '/wiki/Philosophy':
+      if url in self.url_count_cache: # if url is in cache
+        count += self.url_count_cache[url]
+        break
+      if url in temp_url_count_cache: # if it is going into a never ending loop
+        return None
+      temp_url_count_cache[url] = count
+      url = self.get_next_url_in_path(url)
+      if not url:
+        return None
+      count += 1
+    temp_url_count_cache = {k: count - v for k, v in temp_url_count_cache.iteritems()}
+    self.url_count_cache.update(temp_url_count_cache)
+    return count
+
+  def get_next_url_in_path(self, url):
+    page = requests.get('https://en.wikipedia.org' + str(url))
+    tree = html.fromstring(page.content)
+    content_paragraph_links = tree.xpath(self.body_text_selector + 'p/a/@href[1]')
+    content_paragraph_texts_of_links = tree.xpath(self.body_text_selector + 'p/a//text()')
+    main_text = ''.join(tree.xpath(self.body_text_selector + 'p//text()'))
+    if content_paragraph_texts_of_links and content_paragraph_links:
+      return self.find_first_link(content_paragraph_links, content_paragraph_texts_of_links, main_text)
+
+  def find_first_link(self, content_paragraph_links, content_paragraph_texts_of_links, main_text):
+    for i in xrange(len(content_paragraph_links)):
+      link_candidate_text = content_paragraph_texts_of_links[i]
+      link_candidate = content_paragraph_links[i]
+      if (self.link_is_valid(link_candidate) and not
+          self.surrounded_by_parentheses(link_candidate_text, main_text)):
+        return link_candidate
+
+  def surrounded_by_parentheses(self, link_candidate_text, main_text):
+    index_of_link = main_text.find(link_candidate_text)
+    main_text_after_link = main_text[index_of_link:]
+    index_of_first_open_perenthesis_after_link = main_text_after_link.find('(')
+    index_of_first_closed_perenthesis_after_link = main_text_after_link.find(')')
+    return index_of_first_open_perenthesis_after_link > index_of_first_closed_perenthesis_after_link
+
+  def link_is_valid(self, link_candidate):
+    return link_candidate[0] == "/" and link_candidate.find('redlink=1') == -1
+
+crawler = WikiCrawler()
+crawler.run(500)
+print "Final Path Lengths for all 500 random URLs:"
+print crawler.final_counts
+print "Distribution of path lengths:"
+print crawler.path_length_distribution
