@@ -3,8 +3,14 @@ This file finds the path from N random wiki pages to the Philosophy page
 
 ## To run
 ```
-python wiki_path_finder.py.py
+python wiki_path_finder.py N
 ```
+
+i.e.
+```
+python wiki_path_finder.py 3
+```
+(where N is 3)
 
 ## Notes:
 

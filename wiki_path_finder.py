@@ -1,6 +1,7 @@
 from lxml import html
-import requests
 import re
+import requests
+import sys
 
 class WikiCrawler(object) :
 
@@ -67,7 +68,7 @@ class WikiCrawler(object) :
     return link_candidate[0] == "/" and link_candidate.find('redlink=1') == -1
 
 crawler = WikiCrawler()
-crawler.run(500)
+crawler.run(int(sys.argv[1]))
 print "Final Path Lengths for all 500 random URLs:"
 print crawler.final_counts
 print "Distribution of path lengths:"
