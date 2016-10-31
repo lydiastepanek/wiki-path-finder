@@ -1,5 +1,5 @@
 # Wiki-path-finder
-Finds the path from N random wiki pages to the Philosophy page
+Finds the path from N random wiki pages to the Philosophy page (https://en.wikipedia.org/wiki/Philosophy)
 
 ## To run
 ```
