@@ -1,5 +1,5 @@
-# Wiki-crawler
-This file finds the path from N random wiki pages to the Philosophy page
+# Wiki-path-finder
+Finds the path from N random wiki pages to the Philosophy page
 
 ## To run
 ```
