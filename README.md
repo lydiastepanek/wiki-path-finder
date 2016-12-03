@@ -1,16 +1,24 @@
 # Wiki-path-finder
-Finds the path from N random wiki pages to the Philosophy page (https://en.wikipedia.org/wiki/Philosophy)
 
 ## To run
 ```
 python wiki_path_finder.py N
 ```
+(where N is the sample size/number of random sites being tested)
 
-i.e.
+## About
+
+Inspired by https://en.wikipedia.org/wiki/Wikipedia:Getting_to_Philosophy
+"As of February 2016, 97% of all articles in Wikipedia eventually lead to the article Philosophy."
+I wanted to see if this was true so I wrote this script using xpath. As an example, I ran it on 100 articles:
 ```
-python wiki_path_finder.py 3
+python wiki_path_finder.py 100
 ```
-(where N is 3)
+My script uses the "Random Article" link on Wikipedia to select 100 random articles. In this example, the output was the following:
+```
+{5: 2, 6: 1, 7: 3, 8: 8, 9: 8, 10: 7, 11: 11, 12: 9, 13: 5, 14: 8, 15: 7, 16: 8, 17: 3, 18: 5, 19: 1, 20: 2, 21: 3, 22: 3, None: 4, 24: 2}
+```
+This hash represents counts of each path length. A path length of "None" means that the article did not lead to the Philophy page. As the output shows, 96% of those articles led to the Philophy page.
 
 ## Notes:
 
