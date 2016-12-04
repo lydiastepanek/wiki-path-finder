@@ -18,7 +18,7 @@ My script uses the "Random Article" link on Wikipedia to select 100 random artic
 ```
 {5: 2, 6: 1, 7: 3, 8: 8, 9: 8, 10: 7, 11: 11, 12: 9, 13: 5, 14: 8, 15: 7, 16: 8, 17: 3, 18: 5, 19: 1, 20: 2, 21: 3, 22: 3, None: 4, 24: 2}
 ```
-This hash represents counts of each path length. A path length of "None" means that the article did not lead to the Philophy page. As the output shows, 96% of those articles led to the Philophy page.
+This hash represents counts of each path length. A path length of "None" means that the article did not lead to the Philosophy page. As the output shows, 96% of those articles led to the Philosophy page.
 
 ## Notes:
 
